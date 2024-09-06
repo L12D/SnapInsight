@@ -1,9 +1,11 @@
 import pyautogui
 import tkinter as tk
-from PIL import ImageTk, ImageDraw
+from PIL import Image, ImageTk, ImageDraw, ImageOps
 import base64
 import requests
 import os
+
+
 
 
 
@@ -34,8 +36,19 @@ def on_mouse_up(event):
     
     cropped_screenshot = screenshot.crop((left, upper, right, lower))
     cropped_screenshot = cropped_screenshot.convert("RGB")
-    cropped_screenshot.save("screenshot.jpg")
-    print("Screenshot saved with a red rectangle!")
+
+    new_center_x = center_x - left
+    new_center_y = center_y - upper
+    width, height = cropped_screenshot.size
+
+    pad_left = max(256 - new_center_x, 0)
+    pad_top = max(256 - new_center_y, 0)
+    pad_right = max(512 - width, 0)
+    pad_bottom = max(512 - height, 0)
+
+    padded_screenshot = ImageOps.expand(cropped_screenshot, (pad_left, pad_top, pad_right, pad_bottom), fill="black")
+    padded_screenshot = padded_screenshot.crop((0, 0, 512, 512))
+    padded_screenshot.save("screenshot.jpg")
 
     screenshotWindow.destroy()
 
@@ -47,7 +60,9 @@ def encode_image(image_path):
 
 def send_message():
     user_message = user_input.get()
+    chat_log.config(state=tk.NORMAL)
     chat_log.insert(tk.END, f"You: {user_message}\n")
+    chat_log.config(state=tk.DISABLED)
     user_input.delete(0, tk.END)
 
     if not conversation_history:
@@ -77,7 +92,7 @@ def send_message():
     payload = {
         "model": "gpt-4o-mini",
         "messages": conversation_history,
-        "max_tokens": 300
+        "max_tokens": 400
     }
 
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
@@ -85,23 +100,39 @@ def send_message():
     
     conversation_history.append({"role": "assistant", "content": response_message})
     
+    chat_log.config(state=tk.NORMAL)
     chat_log.insert(tk.END, f"LLM: {response_message}\n")
+    chat_log.config(state=tk.DISABLED)
 
 
 def openChatWindow():
     chat_window = tk.Tk()
     chat_window.title("Chat")
+    chat_window.geometry("512x950+1360+60")
+    chat_window.resizable(False, False)
 
     global chat_log
-    chat_log = tk.Text(chat_window, state='normal', height=20, width=50)
-    chat_log.pack()
+    chat_log = tk.Text(chat_window, state='disabled')
+    chat_log.pack(expand=True, fill='both')
+
+    image = Image.open(image_path)
+    photo = ImageTk.PhotoImage(image)
+
+    chat_log.config(state=tk.NORMAL)
+    chat_log.image_create(tk.END, image=photo)
+    chat_log.insert(tk.END, "\n")
+    chat_log.config(state=tk.DISABLED)
+
+
+    input_frame = tk.Frame(chat_window)
+    input_frame.pack(side=tk.BOTTOM, fill='x')
 
     global user_input
-    user_input = tk.Entry(chat_window, width=50)
-    user_input.pack()
+    user_input = tk.Entry(input_frame)
+    user_input.pack(side=tk.LEFT, fill='x', expand=True)
 
-    send_button = tk.Button(chat_window, text="Send", command=send_message)
-    send_button.pack()
+    send_button = tk.Button(input_frame, text="Send", command=send_message)
+    send_button.pack(side=tk.RIGHT)
 
     chat_window.mainloop()
 
@@ -118,7 +149,7 @@ if __name__ == "__main__":
     screenshot = pyautogui.screenshot()
     screenshot_tk = ImageTk.PhotoImage(screenshot)
     canvas = tk.Canvas(screenshotWindow, width=screenshot.width, height=screenshot.height)
-    canvas.pack()
+    canvas.pack(expand=True, fill='both')
     canvas.create_image(0, 0, anchor=tk.NW, image=screenshot_tk)
 
     rect = None
