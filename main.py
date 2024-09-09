@@ -1,10 +1,11 @@
 import pyautogui
 import tkinter as tk
-from PIL import Image, ImageTk, ImageDraw, ImageOps
+from tkhtmlview import HTMLLabel
+import markdown
+from PIL import ImageTk, ImageDraw, ImageOps
 import base64
 import requests
 import os
-
 
 
 
@@ -59,10 +60,15 @@ def encode_image(image_path):
 
 
 def send_message():
+    global html_content
+
     user_message = user_input.get()
-    chat_log.config(state=tk.NORMAL)
-    chat_log.insert(tk.END, f"You: {user_message}\n")
-    chat_log.config(state=tk.DISABLED)
+    
+    user_message_html = markdown.markdown(user_message)
+    
+    html_content += f"<p style='font-size:10px;'><h4 style='color:red;'>You:</h4> {user_message_html}</p>"
+    chat_log.set_html(html_content)
+    
     user_input.delete(0, tk.END)
 
     if not conversation_history:
@@ -99,29 +105,28 @@ def send_message():
     response_message = response.json().get("choices", [{}])[0].get("message", {}).get("content", "")
     
     conversation_history.append({"role": "assistant", "content": response_message})
+
+    response_message_html = markdown.markdown(response_message)
     
-    chat_log.config(state=tk.NORMAL)
-    chat_log.insert(tk.END, f"LLM: {response_message}\n")
-    chat_log.config(state=tk.DISABLED)
+    html_content += f"<p style='font-size:10px;'><h4 style='color:red;'>Assistant:</h4> {response_message_html}</p>"
+    chat_log.set_html(html_content)
 
 
 def openChatWindow():
+    def on_enter_key(event):
+        if user_input.get().strip():
+            send_message()
+    
     chat_window = tk.Tk()
     chat_window.title("Chat")
     chat_window.geometry("512x950+1360+60")
     chat_window.resizable(False, False)
 
     global chat_log
-    chat_log = tk.Text(chat_window, state='disabled')
+    chat_log = HTMLLabel(chat_window, html="")
     chat_log.pack(expand=True, fill='both')
 
-    image = Image.open(image_path)
-    photo = ImageTk.PhotoImage(image)
-
-    chat_log.config(state=tk.NORMAL)
-    chat_log.image_create(tk.END, image=photo)
-    chat_log.insert(tk.END, "\n")
-    chat_log.config(state=tk.DISABLED)
+    chat_log.set_html(f'<img src="{image_path}" />')
 
 
     input_frame = tk.Frame(chat_window)
@@ -130,6 +135,7 @@ def openChatWindow():
     global user_input
     user_input = tk.Entry(input_frame)
     user_input.pack(side=tk.LEFT, fill='x', expand=True)
+    user_input.bind("<Return>", on_enter_key)
 
     send_button = tk.Button(input_frame, text="Send", command=send_message)
     send_button.pack(side=tk.RIGHT)
@@ -164,6 +170,7 @@ if __name__ == "__main__":
     base64_image = encode_image(image_path)
 
     conversation_history = []
+    html_content = f"<img src='screenshot.jpg' style='max-width:100%; height:auto;' />"
 
     openChatWindow()
     os.remove("screenshot.jpg")
