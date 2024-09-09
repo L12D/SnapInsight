@@ -49,7 +49,7 @@ def on_mouse_up(event):
 
     padded_screenshot = ImageOps.expand(cropped_screenshot, (pad_left, pad_top, pad_right, pad_bottom), fill="black")
     padded_screenshot = padded_screenshot.crop((0, 0, 512, 512))
-    padded_screenshot.save("screenshot.jpg")
+    padded_screenshot.save(os.environ["PROJECT_PATH"] + "screenshot.jpg")
 
     screenshotWindow.destroy()
 
@@ -66,7 +66,7 @@ def send_message():
     
     user_message_html = markdown.markdown(user_message)
     
-    html_content += f"<p style='font-size:10px;'><h4 style='color:red;'>You:</h4> {user_message_html}</p>"
+    html_content += f"<p style='font-size:11px;color:white;'><h4 style='color:green;'>You:</h4> {user_message_html}</p>"
     chat_log.set_html(html_content)
     
     user_input.delete(0, tk.END)
@@ -108,7 +108,7 @@ def send_message():
 
     response_message_html = markdown.markdown(response_message)
     
-    html_content += f"<p style='font-size:10px;'><h4 style='color:red;'>Assistant:</h4> {response_message_html}</p>"
+    html_content += f"<p style='font-size:11px;color:white;'><h4 style='color:green;'>Assistant:</h4> {response_message_html}</p>"
     chat_log.set_html(html_content)
 
 
@@ -118,15 +118,17 @@ def openChatWindow():
             send_message()
     
     chat_window = tk.Tk()
-    chat_window.title("Chat")
+    chat_window.title("SnapInsight")
     chat_window.geometry("512x950+1360+60")
     chat_window.resizable(False, False)
 
     global chat_log
-    chat_log = HTMLLabel(chat_window, html="")
+    chat_log = HTMLLabel(chat_window, html="", background="black", foreground="white", highlightthickness=0)
     chat_log.pack(expand=True, fill='both')
 
-    chat_log.set_html(f'<img src="{image_path}" />')
+    global html_content
+    html_content = f'<img src="{os.environ["PROJECT_PATH"] + "/" + image_path}" /><h2 style="color:white;">Chat :</h2>'
+    chat_log.set_html(html_content)
 
 
     input_frame = tk.Frame(chat_window)
@@ -167,10 +169,9 @@ if __name__ == "__main__":
     screenshotWindow.mainloop()
 
     image_path = "screenshot.jpg"
-    base64_image = encode_image(image_path)
+    base64_image = encode_image(os.environ["PROJECT_PATH"] + image_path)
 
     conversation_history = []
-    html_content = f"<img src='screenshot.jpg' style='max-width:100%; height:auto;' />"
 
     openChatWindow()
-    os.remove("screenshot.jpg")
+    os.remove(os.environ["PROJECT_PATH"] + "screenshot.jpg")
