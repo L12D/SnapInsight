@@ -49,7 +49,7 @@ def on_mouse_up(event):
 
     padded_screenshot = ImageOps.expand(cropped_screenshot, (pad_left, pad_top, pad_right, pad_bottom), fill="black")
     padded_screenshot = padded_screenshot.crop((0, 0, 512, 512))
-    padded_screenshot.save(os.environ["PROJECT_PATH"] + "screenshot.jpg")
+    padded_screenshot.save("screenshot.jpg")
 
     screenshotWindow.destroy()
 
@@ -127,7 +127,7 @@ def openChatWindow():
     chat_log.pack(expand=True, fill='both')
 
     global html_content
-    html_content = f'<img src="{os.environ["PROJECT_PATH"] + "/" + image_path}" /><h2 style="color:white;">Chat :</h2>'
+    html_content = f'<img src="{image_path}" /><h2 style="color:white;">Chat :</h2>'
     chat_log.set_html(html_content)
 
 
@@ -169,9 +169,9 @@ if __name__ == "__main__":
     screenshotWindow.mainloop()
 
     image_path = "screenshot.jpg"
-    base64_image = encode_image(os.environ["PROJECT_PATH"] + image_path)
+    base64_image = encode_image(image_path)
 
     conversation_history = []
 
     openChatWindow()
-    os.remove(os.environ["PROJECT_PATH"] + "screenshot.jpg")
+    os.remove("screenshot.jpg")
