@@ -10,5 +10,5 @@ Don't understand something on your screen ? SnapInsight takes a screenshot and l
 
 - Create a python virtual environment
 - Install the riqurements
-- Set the ```PROJECT_PATH``` and ```OPENAI_API_KEY``` environment variables
+- Set the ```OPENAI_API_KEY``` environment variable
 - Execute main.py
