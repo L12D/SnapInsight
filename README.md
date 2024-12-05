@@ -1,4 +1,4 @@
-# SnapInsight
+# SnapInsight (WIP)
 
 (With the help of ChatGPT and Github Copilot)
 

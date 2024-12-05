@@ -66,8 +66,8 @@ def send_message():
     
     user_message_html = markdown.markdown(user_message)
     
-    html_content += f"<p style='font-size:11px;color:white;'><h4 style='color:green;'>You:</h4> {user_message_html}</p>"
-    chat_log.set_html(html_content)
+    html_content += f"<div style='font-size:20px;float:right;color:white;padding:3px;margin:4px;border:5px solid;border-radius:10px;border-color:#808080;'>You:</div><div style='font-size:11px;color:white;padding:3px;margin:4px;margin-bottom:10px;border:5px solid;border-radius:10px;border-color:#606060;'>{user_message_html}</div>"
+    chat_log.set_html(html_content + "</body></html>")
     
     user_input.delete(0, tk.END)
 
@@ -108,8 +108,33 @@ def send_message():
 
     response_message_html = markdown.markdown(response_message)
     
-    html_content += f"<p style='font-size:11px;color:white;'><h4 style='color:green;'>Assistant:</h4> {response_message_html}</p>"
-    chat_log.set_html(html_content)
+    html_content += f"<div style='font-size:20px;float:right;color:white;padding:3px;margin:4px;border:5px solid;border-radius:10px;border-color:#808080;'>Assistant:</div><div style='font-size:11px;color:white;padding:3px;margin:4px;margin-bottom:10px;border:5px solid;border-radius:10px;border-color:#606060;'>{response_message_html}</div>"
+    chat_log.set_html(html_content + "</body></html>")
+
+
+def get_html_content(image_path) :
+    # str = """
+    # .name {
+    #     font-size:20px;
+    #     float: right;
+    #     color: white;
+    #     padding: 3px;
+    #     margin: 4px;
+    #     border: 5px solid;
+    #     border-radius: 10px;
+    #     border-color: #808080;
+    # }
+    # .message {
+    #     font-size:11px;
+    #     color: white;
+    #     padding: 3px;
+    #     margin: 4px;
+    #     margin-bottom: 10px;
+    #     border: 5px solid;
+    #     border-radius: 10px;
+    #     border-color: #606060;
+    # }"""
+    return f"<div style='font-size:20px;float:right;color:white;padding:3px;margin:4px;border:5px solid;border-radius:10px;border-color:#808080;'>You:</div><div style='font-size:11px;color:white;padding:3px;margin:4px;margin-bottom:10px;border:5px solid;border-radius:10px;border-color:#606060;'><img src='{image_path}'/></div>"
 
 
 def openChatWindow():
@@ -119,16 +144,16 @@ def openChatWindow():
     
     chat_window = tk.Tk()
     chat_window.title("SnapInsight")
-    chat_window.geometry("512x950+1360+60")
+    chat_window.geometry("800x950+1090+60")
     chat_window.resizable(False, False)
 
     global chat_log
-    chat_log = HTMLLabel(chat_window, html="", background="black", foreground="white", highlightthickness=0)
+    chat_log = HTMLLabel(chat_window, html="", background="#404040", foreground="white", highlightthickness=0)
     chat_log.pack(expand=True, fill='both')
 
     global html_content
-    html_content = f'<img src="{image_path}" /><h2 style="color:white;">Chat :</h2>'
-    chat_log.set_html(html_content)
+    html_content = get_html_content("screenshot.jpg")
+    chat_log.set_html(html_content + "</body></html>")
 
 
     input_frame = tk.Frame(chat_window)
