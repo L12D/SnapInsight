@@ -1,2 +1,5 @@
 venv
 run
+.vscode/
+.images/
+__pycache__/
