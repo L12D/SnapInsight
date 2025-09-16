@@ -1,12 +1,14 @@
 import sys
 import os
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                               QHBoxLayout, QTextEdit, QLineEdit, QPushButton, 
-                               QScrollArea, QLabel, QMessageBox, QFrame)
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QPixmap, QFont
 import openai
 import base64
+import markdown
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+                               QHBoxLayout, QTextEdit, QLineEdit, QPushButton, 
+                               QScrollArea, QLabel, QMessageBox, QFrame, QTextBrowser)
+
 
 class ChatMessage(QFrame):
     def __init__(self, message, is_user=True, image_path=None):
@@ -34,11 +36,28 @@ class ChatMessage(QFrame):
             image_label.setPixmap(scaled_pixmap)
             layout.addWidget(image_label)
         
-        # Add message text
-        message_label = QLabel(message)
-        message_label.setWordWrap(True)
-        message_label.setFont(QFont("Arial", 10))
-        layout.addWidget(message_label)
+        # Add message text - use QTextBrowser for AI responses to support markdown
+        if is_user:
+            message_widget = QLabel(message)
+            message_widget.setWordWrap(True)
+            message_widget.setFont(QFont("Arial", 13))
+            message_widget.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+            message_widget.setCursor(Qt.IBeamCursor)
+        else:
+            # Use QLabel with HTML converted from markdown for AI responses
+            message_widget = QLabel()
+            
+            # Convert markdown to HTML
+            html_message = markdown.markdown(message)
+            
+            message_widget.setText(html_message)
+            message_widget.setWordWrap(True)
+            message_widget.setFont(QFont("Arial", 13))
+            message_widget.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
+            message_widget.setCursor(Qt.IBeamCursor)
+        
+        layout.addWidget(message_widget)
+
 
 class OpenAIWorker(QThread):
     response_received = Signal(str)
@@ -62,6 +81,7 @@ class OpenAIWorker(QThread):
             self.response_received.emit(response.choices[0].message.content)
         except Exception as e:
             self.error_occurred.emit(str(e))
+
 
 class ChatWindow(QMainWindow):
     def __init__(self, screenshot_path=None):
@@ -256,6 +276,7 @@ class ChatWindow(QMainWindow):
         self.send_button.setEnabled(True)
         self.send_button.setText("Send")
 
+
 def main():
     app = QApplication(sys.argv)
     
@@ -263,6 +284,7 @@ def main():
     window.show()
     
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()
