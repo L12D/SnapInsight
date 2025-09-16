@@ -2,7 +2,10 @@ import tkinter as tk
 from PIL import ImageTk, ImageDraw, ImageOps
 import pyautogui
 import base64
+import os
 
+# Global variable to store the screenshot path
+screenshot_path = None
 
 def on_mouse_down(event):
     global start_x, start_y
@@ -17,7 +20,7 @@ def on_mouse_drag(event):
 
 
 def on_mouse_up(event):
-    global start_x, start_y
+    global start_x, start_y, screenshot_path
 
     draw = ImageDraw.Draw(screenshot)
     draw.rectangle([start_x, start_y, event.x, event.y], outline="red", width=2)
@@ -44,7 +47,11 @@ def on_mouse_up(event):
 
     padded_screenshot = ImageOps.expand(cropped_screenshot, (pad_left, pad_top, pad_right, pad_bottom), fill="black")
     padded_screenshot = padded_screenshot.crop((0, 0, 512, 512))
-    padded_screenshot.save(".images/screenshot.jpg")
+    
+    # Ensure the .images directory exists
+    os.makedirs(".images", exist_ok=True)
+    screenshot_path = ".images/screenshot.jpg"
+    padded_screenshot.save(screenshot_path)
 
     screenshotWindow.destroy()
 
@@ -54,8 +61,9 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 
-def main():
-    global canvas, screenshotWindow, screenshot, rect
+def take_screenshot():
+    """Main function to take screenshot and return the path"""
+    global canvas, screenshotWindow, screenshot, rect, screenshot_path
 
     screenshotWindow = tk.Tk()
     screenshotWindow.attributes("-fullscreen", True)
@@ -73,3 +81,15 @@ def main():
     canvas.bind("<ButtonRelease-1>", on_mouse_up)
 
     screenshotWindow.mainloop()
+    
+    return screenshot_path
+
+
+def main():
+    """For standalone screenshot functionality"""
+    return take_screenshot()
+
+
+if __name__ == "__main__":
+    path = main()
+    print(f"Screenshot saved to: {path}")
