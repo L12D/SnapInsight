@@ -6,8 +6,9 @@ import openai
 import base64
 import markdown
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                               QHBoxLayout, QTextEdit, QLineEdit, QPushButton, 
-                               QScrollArea, QLabel, QMessageBox, QFrame, QTextBrowser)
+                               QHBoxLayout, QLineEdit, QPushButton, 
+                               QScrollArea, QLabel, QMessageBox, QFrame)
+from PySide6.QtCore import Qt, QThread, Signal
 
 
 class ChatMessage(QFrame):
@@ -90,8 +91,9 @@ class ChatWindow(QMainWindow):
         self.messages = []
         self.screenshot_sent = False  # Track if screenshot has been sent
         self.preview_label = None  # Store reference to preview label
+        self.resize(1000, 900)
         self.setup_ui()
-        
+
         # Show welcome message or indicate screenshot is ready
         if screenshot_path and os.path.exists(screenshot_path):
             # Update placeholder text to guide user
@@ -102,7 +104,6 @@ class ChatWindow(QMainWindow):
     
     def setup_ui(self):
         self.setWindowTitle("SnapInsight - AI Chat")
-        self.setGeometry(100, 100, 800, 600)
         
         # Create central widget
         central_widget = QWidget()
@@ -136,7 +137,7 @@ class ChatWindow(QMainWindow):
             self.preview_label = QLabel()
             pixmap = QPixmap(self.screenshot_path)
             # Scale to a small preview size
-            scaled_preview = pixmap.scaled(120, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            scaled_preview = pixmap.scaled(280, 280, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.preview_label.setPixmap(scaled_preview)
             self.preview_label.setStyleSheet("border: 2px solid #ccc; border-radius: 5px; padding: 5px;")
             input_container.addWidget(self.preview_label)
@@ -160,6 +161,9 @@ class ChatWindow(QMainWindow):
         input_container.addLayout(input_layout)
         
         main_layout.addLayout(input_container)
+        
+        # Set focus on the message input field
+        self.message_input.setFocus()
     
     def add_chat_message(self, message, is_user=True, image_path=None):
         """Add a message to the chat display"""
