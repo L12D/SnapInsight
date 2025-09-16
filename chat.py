@@ -74,7 +74,7 @@ class OpenAIWorker(QThread):
             client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
             
             response = client.chat.completions.create(
-                model="gpt-4.1-mini",
+                model="gpt-4.1",
                 messages=self.messages,
                 max_tokens=300
             )
