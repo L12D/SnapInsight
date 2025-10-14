@@ -2,7 +2,7 @@
 
 ### Overview:
 
-Don't understand something on your screen ? SnapInsight takes a screenshot and lets you highlight witht a red rectangle what you don't understand. You can then talk about it with gpt-4.1. It can be linked to a shortcut for faster use.
+Don't understand something on your screen ? SnapInsight takes a screenshot and lets you highlight with a red rectangle what you don't understand. You can then talk about it with gpt-4.1. It can be linked to a shortcut for faster use.
 
 ### Usage:
 
